@@ -1,0 +1,346 @@
+# Ejemplo con modificación de pantalla, items, y cosas
+# Copyleft 2015 The Mojon Twins
+
+# Pequeña intro
+
+# Pintamos la pantalla de fondo y luego ponemos a Maykk
+	SCREEN GFX\SCR00BG.PUT
+	
+# Maykk fue creado desde un PNG con un color fuera de la paleta EGA, que
+# es detectdo por el conversor como "color transparente". De este modo, el
+# gráfico se pinta respetando lo que hay detrás...
+	PUT 10, 0, GFX\SCR00CH.PUT
+	
+# Toda la carga de gráficos se hace en una página oculta. Para hacerlo todo
+# visible...
+	BLIT
+	
+# Un pequeño texto de introducción
+	OPENBOX RIGHT
+	PRINT "Esto es una peque\na demostraci\on de c\omo podr\ian ser los g\vegos dise\nados para este motowr."
+	PRINT "Realmente se trata de algo muy sencillo: pintar imagenes sobre la pantalla (completa o trocitos), detectar la acci\on del usuario, toquetear con flags, y un inventario sencillo."
+	WT
+	CLOSEBOX
+	
+	OPENBOX RIGHT
+	PRINT "Seguramente ya me conoces y sabes que me gusta el bocadillo de ch\opped."
+	PRINT "Ay\udame a hacer un par de mierdas sencillas, que me tengo que ir a trabajar..."
+	WT
+	CLOSEBOX	
+	
+# Muchas veces no es necesario, pero me gusta empezar una localización con 
+# una etiqueta que luego usaré de prefijo para todas las demás etiquetas.
+
+:OFFICE
+
+# Definimos los items
+	CLEARITEMS
+	DEFEMPTY GFX\ITEMPTY.CUT
+	DEFITEM "LLAVE", GFX\ITEMKEY.CUT
+	DEFITEM "ID", GFX\ITEMID.CUT
+	DEFITEM "BRAGAS", GFX\ITEMPANT.CUT
+	
+# Iniciamos el inventario
+	INVENTORY ON
+	CLEARINVENTORY
+
+# Inicializamos algunas flags
+	# FLAG 2 is closet, 0 = closed, 1 = open
+	$2 = 0
+
+# Pintamos la escena.
+:OFFICE_SCRSETUP
+
+# Primero se dibuja el fondo
+	SCREEN GFX\SCR00BG.PUT
+	
+# Ahora las cosas que cambian. 
+# Si no tenemos el item "ID" hay que pintarlo sobre la mesa:
+	HASITEM "ID", :OFFICE_SCRSETUP_NOID
+	PUT 266, 126, GFX\SCR00C2.PUT
+:OFFICE_SCRSETUP_NOID	
+
+# El flag 2 dice si hemos abierto el armario.
+# Si vale 1, es que está abierto, así que lo pintamos.
+	EQ $2, 0, :OFFICE_SCRSETUP_NODOOR
+	PUT 9, 40, GFX\SCR00C1.PUT
+:OFFICE_SCRSETUP_NODOOR
+
+# Ya está todo el pescao vendío. Ahora mostramos los cambios
+	BLIT
+
+SOUND SFX\AH.VOC FG
+	
+# Música
+	MUSIC PLAY MUSIC\CHEM1.S3M
+		
+# Definimos las zonas. Esta pantalla tiene zonas diferentes
+# dependiendo si está el armario abierto o no. Primero definimos
+# las que son comunes a los dos estados...
+:OFFICE_ZONESETUP
+	RESETZONES
+	ZONE "CAJAS", 156, 141, 196, 181
+	ZONE "ESCRITORIO", 188, 122, 304, 144
+	ZONE "LLAVERO", 179, 86, 212, 101
+	ZONE "FUERA", 0, 193, 319, 199, EXIT
+
+# Ahora las dependientes. Si el armario está cerrado...
+# Fijáos que si hay una zona que incluya a otra más pequeña,
+# definimos la pequeña antes, ya que el motor detecta la 
+# primera de la lista que coincide.
+	EQ $2, 1, :OFFICE_ZONESETUP_CLOSET_OPEN
+	ZONE "LETRERO", 15, 62, 24, 89
+	ZONE "ARMARIO", 3, 29, 42, 192
+	GOTO :OFFICE_ZONESETUP_END
+	
+# Y si está abierto...
+:OFFICE_ZONESETUP_CLOSET_OPEN
+	ZONE "LETRERO", 36, 61, 54, 93
+	ZONE "PUERTA", 31, 53, 73, 178
+	ZONE "ARCON", 13, 164, 27, 185
+	ZONE "ARMARIO", 9, 40, 30, 191
+	ZONE "CAJON", 56, 107, 82, 121
+
+:OFFICE_ZONESETUP_END
+# Pongo aquí estas porque se podrían superponer con el armario abierto
+# Y así el armario, si está definido, tiene prioridad.
+	ZONE "VENTANA", 42, 28, 176, 108
+	ZONE "CAJAS VIEJAS", 49, 133, 117, 168
+	
+# Y lanzamos el bucle de juego
+:OFFICE_MAINLOOP
+	DOACTIONS :OFFICE
+	GOTO :OFFICE_MAINLOOP
+	
+# Respuesta a todas las opciones.
+# ¡Tranquis! el motor ignorará las que no existan. 
+
+# VENTANA
+:OFFICE_MIRAR_VENTANA
+	TEXTWT BOTTOM, "Me encanta el ventanal de mi despacho. Es enorme.", "Ahora hace un poco de viento fuera. Parece que va a llover..."
+# Return hace un GOTO al "prefix" definido en el último
+# DOACTIONS seguido de _MAINLOOP. Bastante cómodo...
+	RETURN
+
+:OFFICE_ACCION_VENTANA
+	TEXTWT BOTTOM, "Paso de abrir la ventana. Con el ventazo que hay se me iba a volar todo, y acabo de ordenar.", "Bueno, en realidad lo hizo Xinkss..."
+	RETURN
+	
+# CAJON
+:OFFICE_MIRAR_CAJON
+	TEXTWT BOTTOM, "Es un caj\on al que me gusta llamar 'El sitio miscelaneo'.", "Es donde va a parar toda la mierda suelta que hay por ah\i cuando recogemos."
+	RETURN
+	
+:OFFICE_ACCION_CAJON
+	TEXTWT BOTTOM, "No necesito nada de lo que hay ah\i ahora mismo. Y paso de ponerme a rebuscar, porque siempre termino encontrando algo que mola."
+	RETURN
+
+# CAJAS VIEJAS
+:OFFICE_MIRAR_CAJAS_VIEJAS
+	TEXTWT BOTTOM, "Cajas viejas de ingredientes para hacer galletas. Ahora tienen papeles. Y cosas. No s\e, creo que los archivos y tal van ah\i. Xinkss se encarga."
+	RETURN
+	
+:OFFICE_ACCION_CAJAS_VIEJAS
+	TEXTWT BOTTOM, "Esas cajas son cosa de Xinkss."
+	RETURN
+
+# CAJAS
+:OFFICE_MIRAR_CAJAS
+	TEXTWT BOTTOM, "En estas cajas guardo mis \utiles de trabajo. O eso creo. Recuerda que esto de las galletas es temporal."
+	RETURN
+	
+:OFFICE_ACCION_CAJAS
+	TEXTWT BOTTOM, "Paso de sacar cosas de ah\i. Tengo cosas m\as importantes y urgentes que hacer ahora mismo."
+	RETURN
+
+# ESCRITORIO
+:OFFICE_MIRAR_ESCRITORIO
+	TEXTWT BOTTOM, "Mi escritorio. C\omo mola ser la jefa.", "S\i, aunque sea de mentirijillas."
+	
+# Vamos a poner un texto extra si aún no hemos cogido la tarjeta
+	HASITEM "ID", :OFFICE_MIRAR_ESCRITORIO_ID	
+	TEXTWT BOTTOM, "Ah\i hay una tarjeta de identificaci\on vieja. Creo que es de la anterior due\na o algo as\i."
+	
+:OFFICE_MIRAR_ESCRITORIO_ID
+	RETURN
+	
+:OFFICE_ACCION_ESCRITORIO
+# Hemos cogido ya la tarjeta?
+	HASITEM "ID", :OFFICE_ACCION_ESCRITORIO_ID
+	TEXTWT BOTTOM, "Me voy a llevar esta tarjeta. Vendr\a bien."
+	
+# Con este comando "cogemos" el item	
+	GRAB "ID"
+
+# Hay que modificar el escenario para quitar la tarjeta. Podríamos simplemente
+# volver a dibujarlo todo, pero es más rápido tener el cachito guardado y 
+# simplemente...
+	PUT 266, 126, GFX\SCR00C3.PUT
+	BLIT
+	RETURN
+	
+:OFFICE_ACCION_ESCRITORIO_ID
+	TEXTWT BOTTOM, "No quiero trabajar en mi escritorio ahora. Tengo mejores cosas que hacer.", "De hecho, creo que siempre tengo mejores cosas que hacer."
+	RETURN
+
+# LLAVERO
+:OFFICE_MIRAR_LLAVERO
+# Tenemos la llave?
+	HASITEM "LLAVE", :OFFICE_MIRAR_LLAVERO_LLAVE
+	TEXTWT BOTTOM, "Es el armarito donde guardamos la llave de la furgoneta.", "\!Misteriosamente, la llave est\a dentro!"
+	RETURN
+	
+:OFFICE_MIRAR_LLAVERO_LLAVE	
+	TEXTWT BOTTOM, "Es el armarito donde guardamos la llave de la furgoneta.", "Ahora la llave la tengo yo."
+	RETURN
+	
+:OFFICE_ACCION_LLAVERO
+# Tenemos la llave?
+	HASITEM "LLAVE", :OFFICE_ACCION_LLAVERO_LLAVE
+	TEXTWT BOTTOM, "Aqui esta la llave de la furgoneta, y la voy a necesitar..."
+	GRAB "LLAVE"
+	RETURN
+	
+:OFFICE_ACCION_LLAVERO_LLAVE
+	TEXTWT BOTTOM, "Ya no hay nada m\as que hacer con esto."
+	RETURN
+
+# LETRERO
+# Las acciones relacionadas con el letrero serán diferentes
+# si la puerta del armario está o no abierta, porque los
+# letreros son diferentes. Para ello usamos GOTOF que va a
+# PREFIX_<VALOR_FLAG>
+
+:OFFICE_MIRAR_LETRERO
+	GOTOF :OFFICE_MIRAR_LETRERO, 2
+
+:OFFICE_MIRAR_LETRERO_0
+# $2 = 0, armario cerrado, es el letrero "de fuera"
+	TEXTWT BOTTOM, "El letrero pone: 'El armario se atasca. A ver si puedes echarle un poco de aceite a la cerradura. Fdo. Xinkss'", "Vaya, sab\ia que se olvidaba algo..."
+	RETURN
+
+:OFFICE_MIRAR_LETRERO_1
+# $2 = 1, armario abierto, es el letrero "de dentro"
+	TEXTWT BOTTOM, "El letrero pone: 'Por favor, no olvides cerrar el armario, que entra el gato. Fdo. Xinkss", "\?Y qu\e le molesta el gato ah\i? Qu\e t\ia m\as mani\atica."
+	RETURN
+
+:OFFICE_ACCION_LETRERO
+# Aquí vamos a decir lo mismo para algo, así que da igual qué letrero sea
+	TEXTWT BOTTOM, "Deja tranquilo el letrero, no molesta."
+	RETURN
+
+# ARMARIO
+# Lo mismo que el letrero
+:OFFICE_MIRAR_ARMARIO
+	GOTOF :OFFICE_MIRAR_ARMARIO, 2
+
+:OFFICE_MIRAR_ARMARIO_0
+# $2 = 0, armario cerrado
+	TEXTWT BOTTOM, "En este armario guardamos ropa. Est\a cerrado firmemente."
+	RETURN
+
+:OFFICE_MIRAR_ARMARIO_1
+# $2 = 1, armario abierto
+	TEXTWT BOTTOM, "En este armario guardamos ropa. Creo que deber\iamos invertir en unas perchas. Ahora todo esta en ese arc\on de ah\i abajo."
+	RETURN
+
+:OFFICE_ACCION_ARMARIO
+	GOTOF :OFFICE_ACCION_ARMARIO, 2
+
+:OFFICE_ACCION_ARMARIO_0
+# $2 = 0, armario cerrado
+	TEXTWT BOTTOM, "El armario no se abre. Creo que la cerradura est\a oxidada o rota o yo qu\e s\e."
+	RETURN
+
+:OFFICE_ACCION_ARMARIO_1
+# $2 = 1, armario abierto
+	TEXTWT BOTTOM, "Una vez me escond\i ah\i dentro y le d\i a Xinkss un susto incre\ible. Fue la risa.", "Lo malo es que tuve que esperar tres horas a que llegase."
+	RETURN
+
+# Puerta y arcón sólo aparecen con el armario abierto. Si no está
+# abierto ni siquiera se crean las zonas, así que no tenemos que
+# hacer más comprobaciones, llegados a este punto.
+
+# PUERTA
+:OFFICE_MIRAR_PUERTA
+	TEXTWT BOTTOM, "Una puerta de madera maciza. Tu culo me hipnotiza."
+	RETURN
+	
+:OFFICE_ACCION_PUERTA
+# Cerramos el armario. Cambiamos el valor de $2 y luego volvemos adonde se dibuja la escena.
+	$2 = 0
+	GOTO :OFFICE_SCRSETUP
+
+# ARCON
+:OFFICE_MIRAR_ARCON
+# ¿Tenemos las bragas?
+	HASITEM "BRAGAS", :OFFICE_MIRAR_ARCON_BRAGAS
+	TEXTWT BOTTOM, "Es el arc\on donde guardamos la ropa. Est\a casi vac\io, s\olo quedan unas bragas."
+	RETURN
+	
+:OFFICE_MIRAR_ARCON_BRAGAS
+	TEXTWT BOTTOM, "Es el arc\on donde guardamos la ropa. Est\a vac\io."
+	RETURN
+	
+:OFFICE_ACCION_ARCON
+# ¿Tenemos las bragas?
+	HASITEM "BRAGAS", :OFFICE_ACCION_ARCON_BRAGAS
+	TEXTWT BOTTOM, "Me llevo las bragas. Son de Xinkss, pero las que llevo est\an sucias y no me gusta ir a trabajar con las bragas sucias."
+	GRAB "BRAGAS"
+	RETURN
+	
+:OFFICE_ACCION_ARCON_BRAGAS
+	TEXTWT BOTTOM, "No tengo nada m\as que hacer con el arc\on."
+	RETURN
+	
+# Cosas con el inventario.
+# Las acciones de inventario generan llamadas a estas etiquetas:
+
+:OFFICE_USAR_ID_EN_ARMARIO
+# ¿Está el armario abierto?
+	GOTOF :OFFICE_USAR_ID_EN_ARMARIO, 2
+
+:OFFICE_USAR_ID_EN_ARMARIO_0
+	TEXTWT BOTTOM, "\!Buena idea! Con esta tarjeta puedo intentar abrir el cierre del armario.", "Veamos..."
+# Sonido. BG = background, FG = foreground (esperar a que acabe)
+	SOUND SFX\DOOR.VOC BG
+# Pintamos el armario abierto
+	PUT 9, 40, GFX\SCR00C1.PUT
+	BLIT
+	TEXTWT BOTTOM, "\!VOIE LA!"
+	$2 = 1
+# Nos vamos a la definición de zonas, porque cambian...	
+	GOTO :OFFICE_ZONESETUP
+
+:OFFICE_USAR_ID_EN_ARMARIO_1
+	RETURN	
+	
+:OFFICE_USAR_LLAVE_EN_ARMARIO
+	TEXTWT BOTTOM, "Esa llave no es de este armario. Es de la furgoneta", "Cre\ia que lo hab\ia dicho ya..."
+	RETURN
+	
+:OFFICE_DEFAULT_ACTION
+# DOACTIONS saltará a <prefix>_DEFAULT_ACTION si hay una acción que hacer
+# pero no hay etiqueta correspondiente. Así no tenemos que programar todas
+# las combinaciones de usar objetos en sitios
+	TEXTWT BOTTOM, "Mejor no."
+	RETURN
+	
+# FUERA
+# Aquí hacemos las comprobaciones de que lo hemos hecho todo, y terminamos.
+:OFFICE_IR_FUERA
+
+# ¿Tenemos las llaves?
+	HASITEM "LLAVE", :OFFICE_IR_FUERA_LLAVE
+	TEXTWT BOTTOM, "No puedo irme sin las llaves de la furgoneta. Paso de ir andando."
+	RETURN
+	
+:OFFICE_IR_FUERA_LLAVE
+
+# ¿Tenemos las bragas?
+	HASITEM "BRAGAS", :OFFICE_IR_FUERA_BRAGAS
+	TEXTWT BOTTOM, "Hmmm... Mejor que no. Tengo las bragas sucias. No me gusta ir a la calle con las bragas sucias.", "Tengo que buscar unas."
+	RETURN
+	
+:OFFICE_IR_FUERA_BRAGAS
+	MUSIC STOP
