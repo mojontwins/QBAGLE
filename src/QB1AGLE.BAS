@@ -1685,6 +1685,28 @@ FUNCTION QAGLrunScript% (fileName$, label$, auxs$, auxv%)
 						'QAGLadvanceScriptTo f%, fileName$, label$
 					END IF
 				END IF
+			CASE "LT":
+				v1% = VAL(words$(1))
+				v2% = VAL(words$(2))
+				label$ = words$(3)
+				IF v1% < v2% THEN
+					IF label$ <> "" THEN
+						fPos% = QAGLlabelExists%(fileName$, label$)
+						IF fPos% > 0 THEN SEEK #f%, fPos%
+						'QAGLadvanceScriptTo f%, fileName$, label$
+					END IF
+				END IF
+			CASE "GE":
+				v1% = VAL(words$(1))
+				v2% = VAL(words$(2))
+				label$ = words$(3)
+				IF v1% > v2% THEN
+					IF label$ <> "" THEN
+						fPos% = QAGLlabelExists%(fileName$, label$)
+						IF fPos% > 0 THEN SEEK #f%, fPos%
+						'QAGLadvanceScriptTo f%, fileName$, label$
+					END IF
+				END IF
 			CASE "RUN":
 				fileName$ = words$(1)
 				label$ = words$(2)

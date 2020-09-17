@@ -143,4 +143,104 @@ Como construcciones como la de arriba son muy comunes, hemos añadido una abrevi
 	TEXTWT RIGHT, "Seguramente ya me conoces y sabes que me gusta el bocadillo de ch\opped.", "Ay\udame a hacer un par de cosas sencillas, que me tengo que ir a trabajar..."
 ```
 
-El primer parámetro puede ser `RIGHT`, `CENTER` o `BOTTOM` y equivale al que se pasaba a `OPENBOX`. Luego, separados por comas y entre comillas, va la lista de párrafos. El comportamiento, como hemos dicho, es el mismo de antes: abre una caja de texto en el lugar especificado
+El primer parámetro puede ser `RIGHT`, `CENTER` o `BOTTOM` y equivale al que se pasaba a `OPENBOX`. Luego, separados por comas y entre comillas, va la lista de párrafos. El comportamiento, como hemos dicho, es el mismo de antes: abre una caja de texto en el lugar especificado, imprime en ella, espera a que pulsemos una tecla o hagamos click, y finalmente "cierra" la caja de texto (eliminándola de la pantalla y restaurando el fondo).
+
+## Mostrar imagenes
+
+Hay dos formas de mostrar imagenes, sin importar que estas sean transparentes o sólidas:
+
+* `SCREEN file` carga `file` del disco (puede incluir una ruta relativa o absoluta) y la dibuja en (0, 0). Suele utilizarse para cargar imagenes que ocupen toda la pantalla.
+
+* `PUT x, y, file` carga `file` del disco (puede incluir una ruta relativa o absoluta) y la dibuja en (x, y).
+
+Como se ha mencionado anteriormente, las imagenes no se mostrarán inmediatamente, sino que se irán dibujando en un buffer. Para hacerlo todo visible hay que ejecutar el comando `BLIT`, que copiará el buffer a la pantalla.
+
+Además, tenemos `CLS` que borrará el buffer.
+
+## Saltos
+
+### Saltos incondicionales
+
+Para saltar incondicionalmente a una etiqueta, usaremos `GOTO :etiqueta`. 
+
+Para volver a `<action_prefix>_MAINLOOP` usaremos `RETURN` (ver `ACTION` más adelante).
+
+### Saltos condicionales
+
+* `GOTOF :etiqueta, flag` saltará a una etiqueta `:etiqueta_N` donde `N` es el valor de `flag`.
+
+* `EQ v1, v2, :etiqueta` saltará a `:etiqueta` si `v1` y `v2` son *iguales*. Nótese que tanto `v1` como `v2` pueden ser un flag (si empiezan con `$`).
+
+* `NEQ v1, v2, :etiqueta`, análogo, pero saltando si `v1` y `v2` son *distintos*.
+
+* `LT v1, v2, :etiqueta`, análogo, pero saltando si `v1` < `v2`.
+
+* `GE v1, v2, :etiqueta`, análogo, pero saltando si `v1` >= `v2`.
+
+## Encadenando
+
+* `RUN script, :etiqueta` ejecutará el script `script` (puede incluir una ruta relativa o absoluta) a partir de la etiqueta `:etiquieta`. Si `:etiqueta` se omite o vale `INI` se ejecutará desde el principio.
+
+## Zonas
+
+Las zonas son rectángulos de la pantalla que el jugador puede pulsar para saltar a otra localización o interactuar con lo que haya dibujado ahí.
+
+* `RESETZONES` elimina todas las zonas definidas.
+
+* `ZONE title, x1, y1, x2, y2, [EXIT]` define una zona llamada `title` como un rectángulo que va desde `(x1, y1)` (esquina superior izquierda) hasta `(x2, y2)` (esquina superior derecha). `title` es importante ya que identificará a esta zona en nuestro script. 
+
+El parámetro `EXIT`, si se incluye, hace que esta zona identifique una "salida". Pronto veremos qué significa esto.
+
+Las zonas se pueden superponer, teniendo en cuenta que las zonas se procesan en orden, por lo que si necesitas incluir una zona más pequeña dentro de una grande deberás crear antes la pequeña.
+
+Para ayudarte a definir las zonas hemos incluid una utilidad, `QB1AGL0mkzones.exe`, que puede cargar un archivo png y te deja dibujar rectángulos con el ratón que luego exporta como texto y que puedes usar directamente en tu script.
+
+Una vez definidas las zonas, podemos ejecutar `DOACTIONS` para que el motor deje al usuario interactuar con las zonas:
+
+`DOACTIONS action_prefix`
+
+Cuando el script llegue a este punto se dejará al usuario interactuar con la escena, haciendo click. Si se hace click sobre una zona y esta está definida como salida, el motor hará un `GOTO` a una etiqueta `<action_prefix>_IR_<zona>`, donde `<zona>` será la zona donde ha pulsado el usuario.
+
+Si la zona no está definida como salida, el motor presentará un menú de dos opciones (es muy fácil cambiar el motor para añadir más opciones, por cierto; ver más adelante): `MIRAR` y `ACCION`. Dependiendo de la que pulse el usuario, el motor hará un `GOTO` a una etiqueta `<action_prefix>_<verb>_<zona>`, donde `<verb>` será el verbo que eligió el usuario y `<zona>` la zona sobre la que pulsó.
+
+Si el usuario pulsa pero no acierta en ninguna zona, `DOACTIONS` no hará nada y el script seguirá su ejecución.
+
+Normalmente, lo que se hace es definir una etiqueta `:<action_prefix>_MAINLOOP` antes de `DOACTIONS action_prefix`, con dos objetivos:
+
+* Colocar un `GOTO :<action_prefix>_MAINLOOP` detrás de `DOACTIONS action_prefix` para que se vuelva a ejecutar la parte en la que se deja al usuario interactuar con la escena.
+* Conseguir que `RETURN` vuelva al `DOACTIONS` de la escena.
+
+Para ilustrarlo mejor, consideremos un ejemplo sencillo:
+
+``` 
+	:LocEjemplo
+		RESETZONES
+		ZONE OBJETO, 0, 0, 159, 199
+		ZONE SALIDA, 160, 0, 319, 199, EXIT
+
+	:LocEjemplo_MAINLOOP
+		DOACTIONS LocEjemplo
+		GOTO :LocEjemplo_MAINLOOP
+
+	:LocEjemplo_MIRAR_OBJETO
+		TEXTWT BOTTOM, "Mirar objeto"
+		RETURN
+
+	:LocEjemplo_ACCION_OBJETO
+		TEXTWT BOTTOM, "Accion objeto"
+		RETURN
+
+	:LocEjemplo_IR_SALIDA
+		TEXTWT BOTTOM, "Salida"
+
+	:OtraLocEjemplo
+		# ...
+```
+
+Estamos definiendo una localización "LocEjemplo". Primero ejecutamos `RESETZONES` y definimos dos grandes zonas: la mitad izquierda de la pantalla representará a un objeto, y la derecha una salida.
+
+`DOACTIONS LocEjemplo` definirá `<action_prefix>` como `LocEjemplo` y dejará que el usuario interactúe con las zonas. Dependiendo de qué pulse, generará GOTOs a las etiquetas `:LocEjemplo_MIRAR_OBJETO`, `:LocEjemplo_ACCION_OBJETO` o `:LocEjemplo_IR_SALIDA`. Si no se pulsa sobre ninguna zona (en este ejemplo no es posible) seguiría ejecutando el script, encontraría `GOTO :LocEjemplo_MAINLOOP` y volvería atrás.
+
+En cada una de las etiquetas imprimimos un texto y luego ejecutamos `RETURN`, que en realidad es un alias de `GOTO LocEjemplo_MAINLOOP` que resulta bastante más cómodo y legible.
+
+## El inventario
