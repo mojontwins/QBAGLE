@@ -83,7 +83,7 @@ La música se reproduce usando un conjunto de subrutinas creadas por Bisqwit ( h
 
 El motor es capaz de tocar archivos en formato .VOC de 8 bits sin signo a 8000Hz de hasta 8192 bytes (8Kb). Realmente oldschool. Busca tu conversor favorito para conseguirlos.
 
-# Construyendo el script
+# Construyendo el script: conceptos
 
 ## El buffer fuera de pantalla.
 
@@ -102,3 +102,45 @@ En el motor disponemos de 256 flags donde podemos almacenar valores enteros (nú
 ```
 
 Dará al flag 10 el valor 1. Inicialmente todos los flags valen 0, pero es buena práctica inicializarlos de todos modos. Los flags pueden usarse en condicionales e instrucciones de GOTO compuesto, como veremos en este manual.
+
+### Inventario
+
+Como hemos dicho nuestro inventario puede contener hasta 10 items. El inventario se maneja con una serie de comandos y se comprueba con una serie de condiciones que nos permiten limpiar el inventario, aadir o quitar objetos, o comprobar si tenemos un objeto en concreto.
+
+## Etiquetas
+
+Las etiquetas marcan un punto en el script. Deben ir al principio de la linea y empezar por dos puntos :. Servirán de destino para las instrucciones de salto.
+
+## Comentarios
+
+Todo el texto que aparezca a la derecha del símbolo # será ignorado por el intérprete.
+
+# Manual de programación
+
+## Imprimir texto
+
+Para imprimir textos (descripciones, diálogos) primero hay que abrir una ventana de texto, y luego imprimir en ella. Cuando terminemos, podremos por ejemplo esperar a pulsar una tecla y luego cerrar la ventana de texto:
+
+```
+	OPENBOX RIGHT
+	PRINT "Seguramente ya me conoces y sabes que me gusta el bocadillo de ch\opped."
+	PRINT "Ay\udame a hacer un par de cosas sencillas, que me tengo que ir a trabajar..."
+	WT
+	CLOSEBOX	
+```
+
+* `OPENBOX RIGHT` abre una ventana de texto a la derecha. Hay tres tipos de ventanas de texto: un cuadro centrado aproximadamente de 1/3 de la altura de la pantalla (`OPENBOX CENTER`), uno pegado a la parte inferior de la pantalla e igualmente de aproximadamente 1/3 de la pantalla de altura (`OPENBOX BOTTOM`) y otro que ocupa toda la mitad derecha de la pantalla (`OPENBOX RIGHT`).
+
+* `PRINT` imprime un párrafo con el texto que se le indica, dentro del cuadro que acabamos de abrir. Puedes añadir los párrafos que quieras (siempre que quepan).
+
+* `WT` interrumpe la ejecución hasta que pulsemos una tecla o hagamos click.
+
+* `CLOSEBOX` cierra la ventana y la elimina de pantalla, mostrando de nuevo el fondo que hubiera detrás.
+
+Como construcciones como la de arriba son muy comunes, hemos añadido una abreviatura que junta todos esos comandos en uno:
+
+```
+	TEXTWT RIGHT, "Seguramente ya me conoces y sabes que me gusta el bocadillo de ch\opped.", "Ay\udame a hacer un par de cosas sencillas, que me tengo que ir a trabajar..."
+```
+
+El primer parámetro puede ser `RIGHT`, `CENTER` o `BOTTOM` y equivale al que se pasaba a `OPENBOX`. Luego, separados por comas y entre comillas, va la lista de párrafos. El comportamiento, como hemos dicho, es el mismo de antes: abre una caja de texto en el lugar especificado
