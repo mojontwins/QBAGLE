@@ -11,7 +11,7 @@ Para ejecutar QBAGLE necesitas un PC con MSDOS o un emulador como DosBox o PcEm.
 El intérprete principal, `QB1AGLE.BAS`, cargará por defecto un archivo `SAMPLE.SPT` colocado en el mismo directorio. Si el script principal de tu aventura tiene otro nombre, deberás modificar la linea 253:
 
 ```bas
-	res% = QAGLrunScript%("SAMPLE.SPT", "", "", 0)
+    res% = QAGLrunScript%("SAMPLE.SPT", "", "", 0)
 ```
 
 ## El ejemplo
@@ -54,12 +54,12 @@ Cualquier píxel de otro color será considerado como "transparente".
 `QB1AGLEimgcnv.exe` tomará los siguientes parámetros:
 
 ```
-	$ QB1AGLEimgcnv.exe in=file.png out=file.put [mode=trans] [cutout=x0,y0,x1,y1]
+    $ QB1AGLEimgcnv.exe in=file.png out=file.put [mode=trans] [cutout=x0,y0,x1,y1]
 
-	in        Input filename
-	out       Output filaname
-	mode      solid or trans, solid is default.
-	cutout    output rectangle (coordinates inclusive) instead of full image
+    in        Input filename
+    out       Output filaname
+    mode      solid or trans, solid is default.
+    cutout    output rectangle (coordinates inclusive) instead of full image
 ```
 
 Donde: 
@@ -98,7 +98,7 @@ El juego no es una entidad estática. Tenemos herramientas para que la narració
 En el motor disponemos de 256 flags donde podemos almacenar valores enteros (números de -32768 a 32767). Los flags se nombran con el símbolo `$` seguido del número de flag. Por ejemplo, este comando:
 
 ```
-	$10 = 1
+    $10 = 1
 ```
 
 Dará al flag 10 el valor 1. Inicialmente todos los flags valen 0, pero es buena práctica inicializarlos de todos modos. Los flags pueden usarse en condicionales e instrucciones de GOTO compuesto, como veremos en este manual.
@@ -122,11 +122,11 @@ Todo el texto que aparezca a la derecha del símbolo # será ignorado por el int
 Para imprimir textos (descripciones, diálogos) primero hay que abrir una ventana de texto, y luego imprimir en ella. Cuando terminemos, podremos por ejemplo esperar a pulsar una tecla y luego cerrar la ventana de texto:
 
 ```
-	OPENBOX RIGHT
-	PRINT "Seguramente ya me conoces y sabes que me gusta el bocadillo de ch\opped."
-	PRINT "Ay\udame a hacer un par de cosas sencillas, que me tengo que ir a trabajar..."
-	WT
-	CLOSEBOX	
+    OPENBOX RIGHT
+    PRINT "Seguramente ya me conoces y sabes que me gusta el bocadillo de ch\opped."
+    PRINT "Ay\udame a hacer un par de cosas sencillas, que me tengo que ir a trabajar..."
+    WT
+    CLOSEBOX    
 ```
 
 * `OPENBOX RIGHT` abre una ventana de texto a la derecha. Hay tres tipos de ventanas de texto: un cuadro centrado aproximadamente de 1/3 de la altura de la pantalla (`OPENBOX CENTER`), uno pegado a la parte inferior de la pantalla e igualmente de aproximadamente 1/3 de la pantalla de altura (`OPENBOX BOTTOM`) y otro que ocupa toda la mitad derecha de la pantalla (`OPENBOX RIGHT`).
@@ -140,7 +140,7 @@ Para imprimir textos (descripciones, diálogos) primero hay que abrir una ventan
 Como construcciones como la de arriba son muy comunes, hemos añadido una abreviatura que junta todos esos comandos en uno:
 
 ```
-	TEXTWT RIGHT, "Seguramente ya me conoces y sabes que me gusta el bocadillo de ch\opped.", "Ay\udame a hacer un par de cosas sencillas, que me tengo que ir a trabajar..."
+    TEXTWT RIGHT, "Seguramente ya me conoces y sabes que me gusta el bocadillo de ch\opped.", "Ay\udame a hacer un par de cosas sencillas, que me tengo que ir a trabajar..."
 ```
 
 El primer parámetro puede ser `RIGHT`, `CENTER` o `BOTTOM` y equivale al que se pasaba a `OPENBOX`. Luego, separados por comas y entre comillas, va la lista de párrafos. El comportamiento, como hemos dicho, es el mismo de antes: abre una caja de texto en el lugar especificado, imprime en ella, espera a que pulsemos una tecla o hagamos click, y finalmente "cierra" la caja de texto (eliminándola de la pantalla y restaurando el fondo).
@@ -225,28 +225,28 @@ Normalmente, lo que se hace es definir una etiqueta `:<action_prefix>_MAINLOOP` 
 Para ilustrarlo mejor, consideremos un ejemplo sencillo:
 
 ``` 
-	:LocEjemplo
-		RESETZONES
-		ZONE OBJETO, 0, 0, 159, 199
-		ZONE SALIDA, 160, 0, 319, 199, EXIT
+    :LocEjemplo
+        RESETZONES
+        ZONE OBJETO, 0, 0, 159, 199
+        ZONE SALIDA, 160, 0, 319, 199, EXIT
 
-	:LocEjemplo_MAINLOOP
-		DOACTIONS LocEjemplo
-		GOTO :LocEjemplo_MAINLOOP
+    :LocEjemplo_MAINLOOP
+        DOACTIONS LocEjemplo
+        GOTO :LocEjemplo_MAINLOOP
 
-	:LocEjemplo_MIRAR_OBJETO
-		TEXTWT BOTTOM, "Mirar objeto"
-		RETURN
+    :LocEjemplo_MIRAR_OBJETO
+        TEXTWT BOTTOM, "Mirar objeto"
+        RETURN
 
-	:LocEjemplo_ACCION_OBJETO
-		TEXTWT BOTTOM, "Accion objeto"
-		RETURN
+    :LocEjemplo_ACCION_OBJETO
+        TEXTWT BOTTOM, "Accion objeto"
+        RETURN
 
-	:LocEjemplo_IR_SALIDA
-		TEXTWT BOTTOM, "Salida"
+    :LocEjemplo_IR_SALIDA
+        TEXTWT BOTTOM, "Salida"
 
-	:OtraLocEjemplo
-		# ...
+    :OtraLocEjemplo
+        # ...
 ```
 
 Estamos definiendo una localización "LocEjemplo". Primero ejecutamos `RESETZONES` y definimos dos grandes zonas: la mitad izquierda de la pantalla representará a un objeto, y la derecha una salida.
@@ -312,17 +312,17 @@ Vamos a explicar cómo podemos modificar el motor para presentar más opciones e
 Aquí, alrededor de la linea 1272, aparece el código que dibuja la caja:
 
 ```bas
-	Xb% = x% \ 8 + 1 - 3: Yb% = y% \ 8 + 1
-	IF Xb% < 1 THEN Xb% = 1
-	IF Yb% < 1 THEN Yb% = 1
-	IF Xb% > 35 THEN Xb% = 35
-	IF Yb% > 23 THEN Yb% = 23
-	x0% = (Xb% - 1) * 8 - 4: x1% = x0% + 55
-	y0% = (Yb% - 1) * 8 - 4: y1% = y0% + 23
-	LINE (x0%, y0%)-(x1%, y1%), 0, BF
-	QAGLfancyBoxWire x0%, y0%, x1%, y1%
-	
-	COLOR 15: LOCATE Yb%, Xb%: PRINT "MIRAR"; : LOCATE Yb% + 1, Xb%: PRINT "ACCION";
+    Xb% = x% \ 8 + 1 - 3: Yb% = y% \ 8 + 1
+    IF Xb% < 1 THEN Xb% = 1
+    IF Yb% < 1 THEN Yb% = 1
+    IF Xb% > 35 THEN Xb% = 35
+    IF Yb% > 23 THEN Yb% = 23
+    x0% = (Xb% - 1) * 8 - 4: x1% = x0% + 55
+    y0% = (Yb% - 1) * 8 - 4: y1% = y0% + 23
+    LINE (x0%, y0%)-(x1%, y1%), 0, BF
+    QAGLfancyBoxWire x0%, y0%, x1%, y1%
+    
+    COLOR 15: LOCATE Yb%, Xb%: PRINT "MIRAR"; : LOCATE Yb% + 1, Xb%: PRINT "ACCION";
 ```
 
 Primero habrá que hacer sitio a la caja. Ahora mismo se pinta de forma que hay sitio para dos lineas de texto (de 8 pixels de alto cada una) con márgenes de 4 pixels arriba y abajo (24 píxels en total) y seis caracteres (de 8 pixels de ancho cada uno) con márgenes de 4 pixels a izquierda y derecha (56 píxels en total). 
@@ -330,11 +330,11 @@ Primero habrá que hacer sitio a la caja. Ahora mismo se pinta de forma que hay 
 Este grupo de lineas calcula en qué caracter (de la rejilla de 40x25 caracteres de 8x8 del modo EGA) se pintará el TEXTO de la caja (no el borde)
 
 ```bas
-	Xb% = x% \ 8 + 1 - 3: Yb% = y% \ 8 + 1
-	IF Xb% < 1 THEN Xb% = 1
-	IF Yb% < 1 THEN Yb% = 1
-	IF Xb% > 35 THEN Xb% = 35
-	IF Yb% > 23 THEN Yb% = 23
+    Xb% = x% \ 8 + 1 - 3: Yb% = y% \ 8 + 1
+    IF Xb% < 1 THEN Xb% = 1
+    IF Yb% < 1 THEN Yb% = 1
+    IF Xb% > 35 THEN Xb% = 35
+    IF Yb% > 23 THEN Yb% = 23
 ```
 
 Nuestra caja de 7x3 caracteres (56x24 píxels) se pintará más o menos por debajo de donde se pulsó, centrada:
@@ -345,95 +345,95 @@ Nuestra caja de 7x3 caracteres (56x24 píxels) se pintará más o menos por deba
 Las siguientes lineas cogen las coordenadas donde se va a pintar el texto de la caja y calculan la posición en pixels de las esquinas del borde: `(x0%, y0%)` la superior izquierda y `(x1%, y1%)` la inferior derecha:
 
 ```bas
-	x0% = (Xb% - 1) * 8 - 4: x1% = x0% + 55
-	y0% = (Yb% - 1) * 8 - 4: y1% = y0% + 23
+    x0% = (Xb% - 1) * 8 - 4: x1% = x0% + 55
+    y0% = (Yb% - 1) * 8 - 4: y1% = y0% + 23
 ```
 
 Luego se dibujan los rectángulos y seguidamente se imprimen las opciones:
 
 ```bas
-	COLOR 15: LOCATE Yb%, Xb%: PRINT "MIRAR"; : LOCATE Yb% + 1, Xb%: PRINT "ACCION";
+    COLOR 15: LOCATE Yb%, Xb%: PRINT "MIRAR"; : LOCATE Yb% + 1, Xb%: PRINT "ACCION";
 ```
 
 Imaginemos que queremos añadir dos opciones más: "COGER" y "HABLAR". Como "HABLAR" ocupa lo mismo que "ACCION" sólo tendremos que ajustar la altura del menú. En vez de limitar inferiormente a 23 (para hacer entrar 2 caracteres de alto) limitamos a 21 (para hacer entrar 4).
 
 ```bas
-	IF Xb% > 35 THEN Xb% = 35
-	IF Yb% > 21 THEN Yb% = 21  '' Ahora mide 4 de alto
+    IF Xb% > 35 THEN Xb% = 35
+    IF Yb% > 21 THEN Yb% = 21  '' Ahora mide 4 de alto
 ```
 
 Ahora tendremos que ajustar también los bordes: Ahora en lugar de 4 + 16 + 4 pixels de alto, nuestro recuadro medrá 4 + 32 + 4 (porque las 4 lineas de 8 pixels ocuparán 32 pixels), o sea, 40 pixels. Por tanto, el cálculo del borde cambiará:
 
 ```bas
-	x0% = (Xb% - 1) * 8 - 4: x1% = x0% + 55
-	y0% = (Yb% - 1) * 8 - 4: y1% = y0% + 39  '' Ahora son 40 pixels de alto
+    x0% = (Xb% - 1) * 8 - 4: x1% = x0% + 55
+    y0% = (Yb% - 1) * 8 - 4: y1% = y0% + 39  '' Ahora son 40 pixels de alto
 ```
 
 Finalmente añadiremos nuestras acciones extra:
 
 ```bas
-	COLOR 15: LOCATE Yb%, Xb%: PRINT "MIRAR"; : LOCATE Yb% + 1, Xb%: PRINT "ACCION";
-	LOCATE Yb% + 2, Xb%: PRINT "COGER"; : LOCATE Yb% + 3, Xb%: PRINT "HABLAR";  '' Nuevas opciones
+    COLOR 15: LOCATE Yb%, Xb%: PRINT "MIRAR"; : LOCATE Yb% + 1, Xb%: PRINT "ACCION";
+    LOCATE Yb% + 2, Xb%: PRINT "COGER"; : LOCATE Yb% + 3, Xb%: PRINT "HABLAR";  '' Nuevas opciones
 ```
 
 Todo esto lo único que hará será mostrar el nuevo menú; ahora tendremos que hacer que las nuevas opciones se reconozcan. Para ello sólo hay que modificar este bloque de código, situado a partir de la linea 1292:
 
 ```bas
-	' Check action
-	crsr% = 1
-	action$ = ""
-	IF xm% >= x0% AND xm% <= x1% AND ym% >= y0% AND ym% <= y1% THEN
-		IF ym% < y0% + 12 THEN
-			action$ = "MIRAR"
-		ELSE
-			action$ = "ACCION"
-		END IF
-		lot$ = action$ + " " + zone$
-	ELSE
-		lot$ = zone$
-	END IF
+    ' Check action
+    crsr% = 1
+    action$ = ""
+    IF xm% >= x0% AND xm% <= x1% AND ym% >= y0% AND ym% <= y1% THEN
+        IF ym% < y0% + 12 THEN
+            action$ = "MIRAR"
+        ELSE
+            action$ = "ACCION"
+        END IF
+        lot$ = action$ + " " + zone$
+    ELSE
+        lot$ = zone$
+    END IF
 ```
 
 En concreto se trata de complicar más esto:
 
 ```bas
-	IF ym% < y0% + 12 THEN
-		action$ = "MIRAR"
-	ELSE
-		action$ = "ACCION"
-	END IF
+    IF ym% < y0% + 12 THEN
+        action$ = "MIRAR"
+    ELSE
+        action$ = "ACCION"
+    END IF
 ```
 
 Este código simplemente divide el rectángulo en dos: de mitad hacia arriba es "MIRAR" y de mitad hacia abajo es "ACCION". Podemos modificar este IF fácilmente así: primero vamos intentar obtener un número de 0 a 3 (0, 1, 2, 3) según la altura dentro del recuadro, teniendo en cuenta el margen de 4 pixels. Eliminamos el trozo de cinco lineas de arriba y añadimos:
 
 ```bas
-	i% = (ym% - y0% - 4) \ 8
-	SELECT CASE i
-		CASE 0: action$ = "MIRAR"
-		CASE 1: action$ = "ACCION"
-		CASE 2: action$ = "COGER"
-		CASE 3: action$ = "HABLAR"
-	END SELECT
+    i% = (ym% - y0% - 4) \ 8
+    SELECT CASE i
+        CASE 0: action$ = "MIRAR"
+        CASE 1: action$ = "ACCION"
+        CASE 2: action$ = "COGER"
+        CASE 3: action$ = "HABLAR"
+    END SELECT
 ```
 
 quedando así:
 
 ```bas
-	' Check action
-	crsr% = 1
-	action$ = ""
-	IF xm% >= x0% AND xm% <= x1% AND ym% >= y0% AND ym% <= y1% THEN
-		i% = (ym% - y0% - 4) \ 8
-		SELECT CASE i
-			CASE 0: action$ = "MIRAR"
-			CASE 1: action$ = "ACCION"
-			CASE 2: action$ = "COGER"
-			CASE 3: action$ = "HABLAR"
-		END SELECT
-		lot$ = action$ + " " + zone$
-	ELSE
-		lot$ = zone$
-	END IF
+    ' Check action
+    crsr% = 1
+    action$ = ""
+    IF xm% >= x0% AND xm% <= x1% AND ym% >= y0% AND ym% <= y1% THEN
+        i% = (ym% - y0% - 4) \ 8
+        SELECT CASE i
+            CASE 0: action$ = "MIRAR"
+            CASE 1: action$ = "ACCION"
+            CASE 2: action$ = "COGER"
+            CASE 3: action$ = "HABLAR"
+        END SELECT
+        lot$ = action$ + " " + zone$
+    ELSE
+        lot$ = zone$
+    END IF
 ```
 
 # Fin
