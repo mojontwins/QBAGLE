@@ -8,21 +8,29 @@
 	"buffers":
 	[
 		{
-			"file": "README.md",
+			"file": "/C/Users/jcastano/Downloads/2020917122621848 instrucciones.txt",
 			"settings":
 			{
-				"buffer_size": 8043,
+				"buffer_size": 526,
 				"encoding": "UTF-8",
-				"line_ending": "Unix"
+				"line_ending": "Windows"
 			}
 		},
 		{
-			"file": "examples/simple/SAMPLE.SPT",
+			"file": "/C/Users/jcastano/Downloads/mkimg.bat",
 			"settings":
 			{
-				"buffer_size": 11046,
-				"encoding": "Western (Windows 1252)",
-				"line_ending": "Unix"
+				"buffer_size": 741,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "examples/simple/convert_images.bat",
+			"settings":
+			{
+				"buffer_size": 777,
+				"encoding": "UTF-8",
+				"line_ending": "Windows"
 			}
 		}
 	],
@@ -76,14 +84,23 @@
 	[
 		"/D/git/QBAGLE",
 		"/D/git/QBAGLE/examples",
-		"/D/git/QBAGLE/examples/simple"
+		"/D/git/QBAGLE/examples/simple",
+		"/D/git/QBAGLE/src",
+		"/D/git/QBAGLE/utils"
 	],
 	"file_history":
 	[
+		"/C/Users/jcastano/Downloads/G_2IMGS.BAS",
+		"/D/cosas/dosbox/MB6/dosbox.conf",
+		"/D/cosas/dosbox/vanilla-0.74-2/dosbox.conf",
+		"/D/git/QBAGLE/examples/simple/SAMPLE.SPT",
+		"/D/git/QBAGLE/README.md",
+		"/D/git/QBAGLE/src/QB1AGLE.BAS",
+		"/D/git/QBAGLE/examples/simple/QB1AGLE.BAS"
 	],
 	"find":
 	{
-		"height": 0.0
+		"height": 48.0
 	},
 	"find_in_files":
 	{
@@ -97,6 +114,18 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"..\\util\\",
+			"engineflagsoffset",
+			"maxzones",
+			"MAXZONES",
+			"i%",
+			"i$",
+			"maxZone",
+			".flag",
+			"EXIT",
+			".flag",
+			"actionPrefix",
+			"eq"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -104,6 +133,9 @@
 		"regex": false,
 		"replace_history":
 		[
+			"..\\..\\utils\\",
+			"thisZone%",
+			"i"
 		],
 		"reverse": false,
 		"show_context": true,
@@ -114,36 +146,69 @@
 	"groups":
 	[
 		{
-			"selected": 0,
+			"selected": 1,
 			"sheets":
 			[
 				{
 					"buffer": 0,
-					"file": "README.md",
+					"file": "/C/Users/jcastano/Downloads/2020917122621848 instrucciones.txt",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 8043,
+						"buffer_size": 526,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								8043,
-								8043
+								0,
+								0
 							]
 						],
 						"settings":
 						{
-							"syntax": "Packages/sublime-markdown-extended/Syntaxes/Markdown Extended.sublime-syntax",
-							"translate_tabs_to_spaces": false
+							"incomplete_sync": null,
+							"remote_loading": false,
+							"synced": false,
+							"syntax": "Packages/Text/Plain text.tmLanguage"
 						},
 						"translation.x": 0.0,
-						"translation.y": 2024.0,
+						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 0,
+					"stack_index": 2,
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "/C/Users/jcastano/Downloads/mkimg.bat",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 741,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								741,
+								0
+							]
+						],
+						"settings":
+						{
+							"incomplete_sync": null,
+							"remote_loading": false,
+							"synced": false,
+							"syntax": "Packages/Batch File/Batch File.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
 					"type": "text"
 				}
 			]
@@ -153,32 +218,34 @@
 			"sheets":
 			[
 				{
-					"buffer": 1,
-					"file": "examples/simple/SAMPLE.SPT",
+					"buffer": 2,
+					"file": "examples/simple/convert_images.bat",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 11046,
+						"buffer_size": 777,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								3996,
-								3996
+								15,
+								23
 							]
 						],
 						"settings":
 						{
-							"syntax": "Packages/Text/Plain text.tmLanguage",
-							"translate_tabs_to_spaces": false
+							"incomplete_sync": null,
+							"remote_loading": false,
+							"synced": false,
+							"syntax": "Packages/Batch File/Batch File.sublime-syntax"
 						},
 						"translation.x": 0.0,
-						"translation.y": 989.0,
+						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 1,
+					"stack_index": 0,
 					"type": "text"
 				}
 			]
@@ -186,7 +253,7 @@
 	],
 	"incremental_find":
 	{
-		"height": 0.0
+		"height": 22.0
 	},
 	"input":
 	{
@@ -226,11 +293,15 @@
 	{
 		"height": 0.0
 	},
+	"output.sftp":
+	{
+		"height": 0.0
+	},
 	"pinned_build_system": "",
 	"project": "qbagle.sublime-project",
 	"replace":
 	{
-		"height": 0.0
+		"height": 88.0
 	},
 	"save_all_on_build": true,
 	"select_file":
@@ -260,7 +331,7 @@
 		],
 		"width": 0.0
 	},
-	"selected_group": 0,
+	"selected_group": 1,
 	"settings":
 	{
 	},
@@ -268,7 +339,7 @@
 	"show_open_files": false,
 	"show_tabs": true,
 	"side_bar_visible": true,
-	"side_bar_width": 90.0,
+	"side_bar_width": 229.0,
 	"status_bar_visible": true,
 	"template_settings":
 	{
