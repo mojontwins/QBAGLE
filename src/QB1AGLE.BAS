@@ -1623,7 +1623,48 @@ FUNCTION QAGLrunScript% (fileName$, label$, auxs$, auxv%)
 					LINE (zones(maxZone%).x1, zones(maxZone%).y1)-(zones(maxZone%).x2, zones(maxZone%).y2), 12, B
 					LOCATE zones(maxZone%).y1 \ 8 + 1, zones(maxZone%).x1 \ 8 + 1: PRINT zones(maxZone%).title
 				END IF
+			CASE "ZONEMODIFY":
+				thisZone% = -1
+				FOR i% = 0 To maxZone%
+					IF words$(1) = zones(i%).title THEN 
+						thisZone% = i%
+						EXIT FOR
+					END IF
+				NEXT i%
+				IF thisZone% >= 0 THEN
+					zones(thisZone%).title = words$(2)
+					zones(thisZone%).x1 = VAL(words$(3))
+					zones(thisZone%).y1 = VAL(words$(4))
+					zones(thisZone%).x2 = VAL(words$(5))
+					zones(thisZone%).y2 = VAL(words$(6))
+					IF words$(7) = "" THEN
+						zones(thisZone%).flag = 0
+					ELSEIF words$(7) = "EXIT" THEN
+						zones(thisZone%).flag = 1
+					ELSE
+						zones(thisZone%).flag = VAL(words$(6))
+					END IF
 
+					IF debug% THEN
+						SCREEN , , 0, 0
+						LINE (zones(thisZone%).x1, zones(thisZone%).y1)-(zones(thisZone%).x2, zones(thisZone%).y2), 12, B
+						LOCATE zones(thisZone%).y1 \ 8 + 1, zones(thisZone%).x1 \ 8 + 1: PRINT zones(thisZone%).title
+					END IF
+				END IF
+			CASE "ZONEDELETE":
+				thisZone% = -1
+				FOR i% = 0 To maxZone%
+					IF words$(1) = zones(i%).title THEN 
+						thisZone% = i%
+						EXIT FOR
+					END IF
+				NEXT i%
+				IF thisZone% >= 0 THEN
+					zones(thisZone%).x1 = -1
+					zones(thisZone%).y1 = -1
+					zones(thisZone%).x2 = -1
+					zones(thisZone%).y2 = -1
+				END IF
 			CASE "DOACTIONS":
 				SCREEN , , 0, 0
 				actionPrefix$ = words$(1)

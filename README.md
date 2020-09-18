@@ -145,6 +145,8 @@ Como construcciones como la de arriba son muy comunes, hemos añadido una abrevi
 
 El primer parámetro puede ser `RIGHT`, `CENTER` o `BOTTOM` y equivale al que se pasaba a `OPENBOX`. Luego, separados por comas y entre comillas, va la lista de párrafos. El comportamiento, como hemos dicho, es el mismo de antes: abre una caja de texto en el lugar especificado, imprime en ella, espera a que pulsemos una tecla o hagamos click, y finalmente "cierra" la caja de texto (eliminándola de la pantalla y restaurando el fondo).
 
+Cuando hacemos `WT` (ya sea de forma explícita o como parte de `TEXTWT`), las coordenadas (x, y) del ratón donde el usuario ha pulsado se almacenan en los flags 253 y 254, respectivamente.
+
 ## Mostrar imagenes
 
 Hay dos formas de mostrar imagenes, sin importar que estas sean transparentes o sólidas:
@@ -181,15 +183,25 @@ Para volver a `<action_prefix>_MAINLOOP` usaremos `RETURN` (ver `ACTION` más ad
 
 * `RUN script, :etiqueta` ejecutará el script `script` (puede incluir una ruta relativa o absoluta) a partir de la etiqueta `:etiquieta`. Si `:etiqueta` se omite o vale `INI` se ejecutará desde el principio.
 
+## Acabando
+
+* `THE_END` termina la ejecución del juego.
+
+## Tres opciones
+
+* `ANSWER texto1, texto2, texto3` mostrará una caja de texto con las tres cadenas, dejando que el jugador elija una. Tras esto, el motor almacenará qué respuesta se pulsó (1, 2 o 3) en el flag 251.
+
 ## Zonas
 
 Las zonas son rectángulos de la pantalla que el jugador puede pulsar para saltar a otra localización o interactuar con lo que haya dibujado ahí.
 
 * `RESETZONES` elimina todas las zonas definidas.
 
-* `ZONE title, x1, y1, x2, y2, [EXIT]` define una zona llamada `title` como un rectángulo que va desde `(x1, y1)` (esquina superior izquierda) hasta `(x2, y2)` (esquina superior derecha). `title` es importante ya que identificará a esta zona en nuestro script. 
+* `ZONE nombre, x1, y1, x2, y2, [EXIT]` define una zona llamada `nombre` como un rectángulo que va desde `(x1, y1)` (esquina superior izquierda) hasta `(x2, y2)` (esquina superior derecha). `nombre` es importante ya que identificará a esta zona en nuestro script. 
 
 El parámetro `EXIT`, si se incluye, hace que esta zona identifique una "salida". Pronto veremos qué significa esto.
+
+En principio podemos definir 16 zonas en la pantalla, pero si necesitas más sólo hay que modificar levemente `QB1AGLE.BAS` cambiando el valor de `CONST MAXZONES = 16` en la linea 100.
 
 Las zonas se pueden superponer, teniendo en cuenta que las zonas se procesan en orden, por lo que si necesitas incluir una zona más pequeña dentro de una grande deberás crear antes la pequeña.
 
@@ -243,4 +255,187 @@ Estamos definiendo una localización "LocEjemplo". Primero ejecutamos `RESETZONE
 
 En cada una de las etiquetas imprimimos un texto y luego ejecutamos `RETURN`, que en realidad es un alias de `GOTO LocEjemplo_MAINLOOP` que resulta bastante más cómodo y legible.
 
+### Modificando zonas
+
+Las zonas definidas se pueden modificar o eliminar:
+
+* `ZONEMODIFY nombre, nuevo_nombre, x1, y1, x2, y2` modificará los valores de la zona `nombre`.
+
+* `ZONEDELETE nombre` elimina la zona `nombre`.
+
 ## El inventario
+
+La gestión del inventario tiene dos partes: primero definir los objetos y sus gráficos asociados (para que aparezcan en el inventario que se muestra en la parte superior de la pantalla), y luego los comandos asociados a operar o hacer comprobaciones.
+
+Los gráficos asociados a los objetos son cuadrados de 32x32 pixels que se pintarán en el inventario. Puedes verlos en acción en la aventura de ejemplo cuando acercas el ratón a la parte superior de la pantalla.
+
+Para decirle al motor que nuestro juego necesita inventario y que lo active al llevar el ratón a la parte superior de la pantalla tendremos que ejecutar
+
+* `INVENTORY ON`.
+
+Para eliminar todos los objetos definidos en el juego ejecutaremos
+
+* `CLEARITEMS`.
+
+Lo primero que haremos será definir el gráfico que representa un slot "vacío" del inventario.
+
+* `DEFEMPTY file`, donde `file` es una imagen (puede incluir ruta relativa o absoluta).
+
+Y tras esto definiremos todos los objetos que pueden aparecer en nuestro juego:
+
+* `DEFITEM nombre, file` añade al juego un item identificado por `nombre` y representado por la imagen `file` (que, como siempre, puede incluir rutas absolutas / relativas).
+
+Habiendo definido los objetos del juego y activado el inventario, podemos empezar a operar con él:
+
+* `CLEARINVENTORY` elimina cualquier objeto que pudiera haber en el inventario.
+
+* `GRAB nombre` añade al inventario el objeto definido como `nombre`, siempre que quepa (si no, se mostrará un mensaje al jugador).
+
+* `DROP nombre` elimina el objeto `nombre` del inventario. Si `nombre` no está en el inventario, no pasará nada.
+
+* `HASITEM nombre, :etiqueta` si el objeto `nombre` está en el inventario, saltará a `:etiqueta`. 
+
+## Sonido
+
+Como hemos dicho, el motor soporta sonido digital en formato VOC (8000Hz, 8 bit sin signo, hasta 8Kb) y música en formato S3M con instrumentos FM.
+
+* `SOUND file, [BG]` tocará el sonido contenido en el archivo `file` (que, como siempre, puede contener una ruta). Si se incluye `BG` el sonido se tocará de fondo sin interrumpir la ejecución.
+
+* `MUSIC PLAY file` tocará de fondo la música S3M/FM en el archivo `file` (puede tener ruta bla bla).
+
+* `MUSIC STOP` parará la música de fondo.
+
+# Modificando el motor
+
+Vamos a explicar cómo podemos modificar el motor para presentar más opciones en el menú emergente que aparece cuando el jugador pulsa sobre una zona. Tendremos que editar `QB1AGLE.BAS` y localizar el código de la `SUB` `QAGLaction`.
+
+Aquí, alrededor de la linea 1272, aparece el código que dibuja la caja:
+
+```bas
+	Xb% = x% \ 8 + 1 - 3: Yb% = y% \ 8 + 1
+	IF Xb% < 1 THEN Xb% = 1
+	IF Yb% < 1 THEN Yb% = 1
+	IF Xb% > 35 THEN Xb% = 35
+	IF Yb% > 23 THEN Yb% = 23
+	x0% = (Xb% - 1) * 8 - 4: x1% = x0% + 55
+	y0% = (Yb% - 1) * 8 - 4: y1% = y0% + 23
+	LINE (x0%, y0%)-(x1%, y1%), 0, BF
+	QAGLfancyBoxWire x0%, y0%, x1%, y1%
+	
+	COLOR 15: LOCATE Yb%, Xb%: PRINT "MIRAR"; : LOCATE Yb% + 1, Xb%: PRINT "ACCION";
+```
+
+Primero habrá que hacer sitio a la caja. Ahora mismo se pinta de forma que hay sitio para dos lineas de texto (de 8 pixels de alto cada una) con márgenes de 4 pixels arriba y abajo (24 píxels en total) y seis caracteres (de 8 pixels de ancho cada uno) con márgenes de 4 pixels a izquierda y derecha (56 píxels en total). 
+
+Este grupo de lineas calcula en qué caracter (de la rejilla de 40x25 caracteres de 8x8 del modo EGA) se pintará el TEXTO de la caja (no el borde)
+
+```bas
+	Xb% = x% \ 8 + 1 - 3: Yb% = y% \ 8 + 1
+	IF Xb% < 1 THEN Xb% = 1
+	IF Yb% < 1 THEN Yb% = 1
+	IF Xb% > 35 THEN Xb% = 35
+	IF Yb% > 23 THEN Yb% = 23
+```
+
+Nuestra caja de 7x3 caracteres (56x24 píxels) se pintará más o menos por debajo de donde se pulsó, centrada:
+
+* `Xb%` valdrá `x% \ 8` (pasamos la coordenada en pixels del ratón a caracteres) más 1 (porque las coordenadas de caracteres empiezan en 1) menos 3 (que es 7/2 más o menos). Luego, con lso IFs, nos aseguramos de que la caja no se salga de la pantalla: Xb% se mantendrá entre 1 y 34. Si nuestra palabra más larga en vez de `ACCION` fuera `RECOGER`, que tiene 7 letras, tendríamos que adaptar estos cálculos.
+* `Yb%`, de la misma forma, valdrà `y% \ 8` (pasamos la coordenada en pixels del ratón a caracteres) más 1 (porque las coordenadas de caracteres empiezna en 1). Igualmente se limita el rango para no salir de la pantalla.
+
+Las siguientes lineas cogen las coordenadas donde se va a pintar el texto de la caja y calculan la posición en pixels de las esquinas del borde: `(x0%, y0%)` la superior izquierda y `(x1%, y1%)` la inferior derecha:
+
+```bas
+	x0% = (Xb% - 1) * 8 - 4: x1% = x0% + 55
+	y0% = (Yb% - 1) * 8 - 4: y1% = y0% + 23
+```
+
+Luego se dibujan los rectángulos y seguidamente se imprimen las opciones:
+
+```bas
+	COLOR 15: LOCATE Yb%, Xb%: PRINT "MIRAR"; : LOCATE Yb% + 1, Xb%: PRINT "ACCION";
+```
+
+Imaginemos que queremos añadir dos opciones más: "COGER" y "HABLAR". Como "HABLAR" ocupa lo mismo que "ACCION" sólo tendremos que ajustar la altura del menú. En vez de limitar inferiormente a 23 (para hacer entrar 2 caracteres de alto) limitamos a 21 (para hacer entrar 4).
+
+```bas
+	IF Xb% > 35 THEN Xb% = 35
+	IF Yb% > 21 THEN Yb% = 21  '' Ahora mide 4 de alto
+```
+
+Ahora tendremos que ajustar también los bordes: Ahora en lugar de 4 + 16 + 4 pixels de alto, nuestro recuadro medrá 4 + 32 + 4 (porque las 4 lineas de 8 pixels ocuparán 32 pixels), o sea, 40 pixels. Por tanto, el cálculo del borde cambiará:
+
+```bas
+	x0% = (Xb% - 1) * 8 - 4: x1% = x0% + 55
+	y0% = (Yb% - 1) * 8 - 4: y1% = y0% + 39  '' Ahora son 40 pixels de alto
+```
+
+Finalmente añadiremos nuestras acciones extra:
+
+```bas
+	COLOR 15: LOCATE Yb%, Xb%: PRINT "MIRAR"; : LOCATE Yb% + 1, Xb%: PRINT "ACCION";
+	LOCATE Yb% + 2, Xb%: PRINT "COGER"; : LOCATE Yb% + 3, Xb%: PRINT "HABLAR";  '' Nuevas opciones
+```
+
+Todo esto lo único que hará será mostrar el nuevo menú; ahora tendremos que hacer que las nuevas opciones se reconozcan. Para ello sólo hay que modificar este bloque de código, situado a partir de la linea 1292:
+
+```bas
+	' Check action
+	crsr% = 1
+	action$ = ""
+	IF xm% >= x0% AND xm% <= x1% AND ym% >= y0% AND ym% <= y1% THEN
+		IF ym% < y0% + 12 THEN
+			action$ = "MIRAR"
+		ELSE
+			action$ = "ACCION"
+		END IF
+		lot$ = action$ + " " + zone$
+	ELSE
+		lot$ = zone$
+	END IF
+```
+
+En concreto se trata de complicar más esto:
+
+```bas
+	IF ym% < y0% + 12 THEN
+		action$ = "MIRAR"
+	ELSE
+		action$ = "ACCION"
+	END IF
+```
+
+Este código simplemente divide el rectángulo en dos: de mitad hacia arriba es "MIRAR" y de mitad hacia abajo es "ACCION". Podemos modificar este IF fácilmente así: primero vamos intentar obtener un número de 0 a 3 (0, 1, 2, 3) según la altura dentro del recuadro, teniendo en cuenta el margen de 4 pixels. Eliminamos el trozo de cinco lineas de arriba y añadimos:
+
+```bas
+	i% = (ym% - y0% - 4) \ 8
+	SELECT CASE i
+		CASE 0: action$ = "MIRAR"
+		CASE 1: action$ = "ACCION"
+		CASE 2: action$ = "COGER"
+		CASE 3: action$ = "HABLAR"
+	END SELECT
+```
+
+quedando así:
+
+```bas
+	' Check action
+	crsr% = 1
+	action$ = ""
+	IF xm% >= x0% AND xm% <= x1% AND ym% >= y0% AND ym% <= y1% THEN
+		i% = (ym% - y0% - 4) \ 8
+		SELECT CASE i
+			CASE 0: action$ = "MIRAR"
+			CASE 1: action$ = "ACCION"
+			CASE 2: action$ = "COGER"
+			CASE 3: action$ = "HABLAR"
+		END SELECT
+		lot$ = action$ + " " + zone$
+	ELSE
+		lot$ = zone$
+	END IF
+```
+
+# Fin
+
+¿Hará alguien algo con esto algún día?
